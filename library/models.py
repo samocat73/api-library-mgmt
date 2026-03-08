@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import CustomUser
+
 
 class Author(models.Model):
     last_name = models.CharField(
@@ -13,6 +15,7 @@ class Author(models.Model):
     birth_date = models.DateField(
         verbose_name="Дата рождения автора", help_text="Укажите дату рождения автора"
     )
+
 
     class Meta:
         verbose_name = "Автор"
@@ -37,6 +40,7 @@ class Book(models.Model):
     publication_date = models.DateField(
         verbose_name="Дата публикации книги", help_text="Укажите дату публикации книги"
     )
+    genre = models.CharField(verbose_name="Жанр", help_text="Укажите жанр книги")
 
     class Meta:
         verbose_name = "Книга"
@@ -44,3 +48,31 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+
+class BookDistribution(models.Model):
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        verbose_name="Книга, которую выдали",
+        help_text="Укажите книгу, которую выдали"
+    )
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        verbose_name="Читатель, которому выдали книгу",
+        null=True,
+        blank=True,
+    )
+    date_issue = models.DateField(
+        verbose_name="Дата выдачи книги",
+        auto_now_add=True
+    )
+    return_date = models.DateField(
+        verbose_name="Дата возврата книги",
+        blank=True, null=True,
+    )
+    is_returned = models.BooleanField(verbose_name="Флаг возврата", default=False)
+
+    class Meta:
+        unique_together = ('book', 'user')
