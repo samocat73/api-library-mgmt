@@ -49,7 +49,7 @@ class Book(models.Model):
         return f"{self.title}"
 
 
-class BookDistribution(models.Model):
+class BookLoan(models.Model):
     book = models.ForeignKey(
         Book,
         on_delete=models.CASCADE,
@@ -60,8 +60,6 @@ class BookDistribution(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         verbose_name="Читатель, которому выдали книгу",
-        null=True,
-        blank=True,
     )
     date_issue = models.DateField(verbose_name="Дата выдачи книги", auto_now_add=True)
     return_date = models.DateField(
