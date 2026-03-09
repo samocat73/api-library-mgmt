@@ -73,3 +73,5 @@ class BookDistribution(models.Model):
 
     class Meta:
         unique_together = ("book", "user")
+        verbose_name = "Выдача книги"
+        verbose_name_plural = "Выдачи книги"

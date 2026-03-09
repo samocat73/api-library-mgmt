@@ -56,7 +56,10 @@ class BookDistributionViewSet(views.APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        distributions = BookDistribution.objects.filter(user=user)
+        if user.is_staff:
+            distributions = BookDistribution.objects.all()
+        else:
+            distributions = BookDistribution.objects.filter(user=user)
         data = []
         for distribution in distributions:
             data.append(
