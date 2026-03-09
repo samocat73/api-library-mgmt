@@ -12,7 +12,7 @@ router.register("authors", AuthorViewSet)
 app_name = LibraryConfig.name
 
 urlpatterns = [
-    path('books/distribution/', BookDistributionViewSet.as_view(), name='distribution'),
+    path("books/distribution/", BookDistributionViewSet.as_view(), name="distribution"),
 ]
 
 urlpatterns += router.urls

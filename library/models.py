@@ -16,7 +16,6 @@ class Author(models.Model):
         verbose_name="Дата рождения автора", help_text="Укажите дату рождения автора"
     )
 
-
     class Meta:
         verbose_name = "Автор"
         verbose_name_plural = "Авторы"
@@ -55,7 +54,7 @@ class BookDistribution(models.Model):
         Book,
         on_delete=models.CASCADE,
         verbose_name="Книга, которую выдали",
-        help_text="Укажите книгу, которую выдали"
+        help_text="Укажите книгу, которую выдали",
     )
     user = models.ForeignKey(
         CustomUser,
@@ -64,15 +63,13 @@ class BookDistribution(models.Model):
         null=True,
         blank=True,
     )
-    date_issue = models.DateField(
-        verbose_name="Дата выдачи книги",
-        auto_now_add=True
-    )
+    date_issue = models.DateField(verbose_name="Дата выдачи книги", auto_now_add=True)
     return_date = models.DateField(
         verbose_name="Дата возврата книги",
-        blank=True, null=True,
+        blank=True,
+        null=True,
     )
     is_returned = models.BooleanField(verbose_name="Флаг возврата", default=False)
 
     class Meta:
-        unique_together = ('book', 'user')
+        unique_together = ("book", "user")

@@ -8,23 +8,60 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('library', '0001_initial'),
+        ("library", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BookDistribution',
+            name="BookDistribution",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date_issue', models.DateField(auto_now_add=True, verbose_name='Дата выдачи книги')),
-                ('return_date', models.DateField(blank=True, null=True, verbose_name='Дата возврата книги')),
-                ('is_returned', models.BooleanField(default=False, verbose_name='Флаг возврата')),
-                ('book', models.ForeignKey(help_text='Укажите книгу, которую выдали', on_delete=django.db.models.deletion.CASCADE, to='library.book', verbose_name='Книга, которую выдали')),
-                ('user', models.ForeignKey(help_text='Укажите читателя, которому выдали книгу', on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Читатель, которому выдали книгу')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "date_issue",
+                    models.DateField(
+                        auto_now_add=True, verbose_name="Дата выдачи книги"
+                    ),
+                ),
+                (
+                    "return_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Дата возврата книги"
+                    ),
+                ),
+                (
+                    "is_returned",
+                    models.BooleanField(default=False, verbose_name="Флаг возврата"),
+                ),
+                (
+                    "book",
+                    models.ForeignKey(
+                        help_text="Укажите книгу, которую выдали",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="library.book",
+                        verbose_name="Книга, которую выдали",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        help_text="Укажите читателя, которому выдали книгу",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Читатель, которому выдали книгу",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('book', 'user')},
+                "unique_together": {("book", "user")},
             },
         ),
     ]

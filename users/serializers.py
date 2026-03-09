@@ -1,4 +1,3 @@
-from django.contrib.auth.models import AbstractUser
 from rest_framework import serializers
 
 from users.models import CustomUser
@@ -12,4 +11,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("id", "username",)
+        fields = (
+            "id",
+            "username",
+        )
