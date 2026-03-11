@@ -10,12 +10,23 @@ from library.serializers import (AuthorSerializer, BookDeliverySerializer,
                                  BookLoanSerializer, BookReturnSerializer,
                                  BookSerializer)
 from library.services import BookFilter
+from users.permissions import IsLibrarianPermission
 
 
 class BookViewSet(viewsets.ModelViewSet):
+    """Контроллер для CRUD операций для модели Book."""
+
     serializer_class = BookSerializer
     queryset = Book.objects.all()
     filterset_class = BookFilter
+
+    def get_permissions(self):
+        """
+        Развешаем опасные действия только пользователям с разрешениями.
+        """
+        if self.action in ["update", "retrieve", "partial_update", "create"]:
+            self.permission_classes = [IsLibrarianPermission]
+        return super().get_permissions()
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -24,9 +35,19 @@ class AuthorViewSet(viewsets.ModelViewSet):
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
 
+    def get_permissions(self):
+        """
+        Развешаем опасные действия только пользователям с разрешениями.
+        """
+        if self.action in ["update", "retrieve", "partial_update", "create"]:
+            self.permission_classes = [IsLibrarianPermission]
+        return super().get_permissions()
+
 
 class BookDeliveryAPIView(APIView):
     """Контроллер для выдачи книги указанному пользователю по POST запросу."""
+
+    permission_classes = [IsLibrarianPermission]
 
     def post(self, request, *args, **kwargs):
         serializer = BookDeliverySerializer(data=request.data)
@@ -95,7 +116,13 @@ class BookReturnAPIView(APIView):
 
 
 class BookLoanListAPIView(ListAPIView):
-    """Контроллер для просмотра информации о возвратах книг."""
+    """Контроллер для просмотра информации выдачах книг."""
 
     serializer_class = BookLoanSerializer
-    queryset = BookLoan.objects.all()
+
+    def get_queryset(self):
+        """В зависимости от разрешений возвращаем разный queryset."""
+        user = self.request.user
+        if user.groups.filter(name="librarian").exists():
+            return BookLoan.objects.all()
+        return BookLoan.objects.filter(user=user)
