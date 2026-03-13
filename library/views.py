@@ -6,9 +6,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from library.models import Author, Book, BookLoan
-from library.serializers import (AuthorSerializer, BookDeliverySerializer,
-                                 BookLoanSerializer, BookReturnSerializer,
-                                 BookSerializer)
+from library.serializers import (
+    AuthorSerializer,
+    BookDeliverySerializer,
+    BookLoanSerializer,
+    BookSerializer,
+)
 from library.services import BookFilter
 from users.permissions import IsLibrarianPermission
 
@@ -51,66 +54,75 @@ class BookDeliveryAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = BookDeliverySerializer(data=request.data)
-        if serializer.is_valid():
-            book = serializer.validated_data["book"]
-            user = serializer.validated_data["user"]
-            loan, created = BookLoan.objects.get_or_create(user=user, book=book)
-            if created:
-                return Response(
-                    data={
-                        "message": "Книга выдана пользователю",
-                        "data": model_to_dict(loan),
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
-            if loan.is_returned:
-                loan.date_issue = timezone.now().date()
-                loan.return_date = None
-                loan.is_returned = False
-                loan.save()
-                return Response(
-                    data={
-                        "message": "Книга выдана пользователю",
-                        "data": model_to_dict(loan),
-                    },
-                    status=status.HTTP_201_CREATED,
-                )
+        if not serializer.is_valid():
+            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        book = serializer.validated_data["book"]
+        user = serializer.validated_data["user"]
+        loan, created = BookLoan.objects.get_or_create(user=user, book=book)
+        if created:
             return Response(
                 data={
-                    "message": "Эта книга уже выдана пользователю",
+                    "message": "Книга выдана",
                     "data": model_to_dict(loan),
                 },
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_201_CREATED,
             )
-        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if loan.is_returned:
+            loan.date_issue = timezone.now().date()
+            loan.return_date = None
+            loan.is_returned = False
+            loan.save()
+            return Response(
+                data={
+                    "message": "Книга выдана",
+                    "data": model_to_dict(loan),
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            data={
+                "message": "Этот пользователь не вернул эту книгу",
+                "data": model_to_dict(loan),
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class BookReturnAPIView(APIView):
     """Контроллер для возврата книги пользователем по POST запросу."""
 
+    permission_classes = [IsLibrarianPermission]
+
     def post(self, request, *args, **kwargs):
-        serializer_class = BookReturnSerializer(data=request.data)
+        serializer_class = BookDeliverySerializer(data=request.data)
         if not serializer_class.is_valid():
             return Response(
                 data=serializer_class.errors, status=status.HTTP_400_BAD_REQUEST
             )
         book = serializer_class.validated_data["book"]
-        user = request.user
+        user = serializer_class.validated_data["user"]
         if BookLoan.objects.filter(user=user, book=book).exists():
             loan = BookLoan.objects.get(user=user, book=book)
             if loan.is_returned:
-                loan.return_date = timezone.now().date()
-                loan.is_returned = True
-                loan.save()
                 return Response(
                     data={
-                        "message": "Ранее вы уже вернули эту книгу",
+                        "message": "Ранее уже вернули эту книгу",
                         "data": model_to_dict(loan),
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            loan.return_date = timezone.now().date()
+            loan.is_returned = True
+            loan.save()
+            return Response(
+                {
+                    "message": "Книга возвращена",
+                    "data": model_to_dict(loan),
+                },
+                status=status.HTTP_200_OK,
+            )
         return Response(
-            data={"message": "Вы не брали эту книгу"},
+            data={"message": "Эту книгу нельзя вернут"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
