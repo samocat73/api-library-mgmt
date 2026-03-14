@@ -2,13 +2,8 @@ from django.urls import path
 from rest_framework import routers
 
 from library.apps import LibraryConfig
-from library.views import (
-    AuthorViewSet,
-    BookDeliveryAPIView,
-    BookLoanListAPIView,
-    BookReturnAPIView,
-    BookViewSet,
-)
+from library.views import (AuthorViewSet, BookDeliveryAPIView,
+                           BookLoanListAPIView, BookReturnAPIView, BookViewSet)
 
 router = routers.DefaultRouter()
 router.register("books", BookViewSet)

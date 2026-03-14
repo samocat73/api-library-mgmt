@@ -6,18 +6,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from library.models import Author, Book, BookLoan
-from library.serializers import (
-    AuthorSerializer,
-    BookDeliverySerializer,
-    BookLoanSerializer,
-    BookSerializer,
-)
+from library.serializers import (AuthorSerializer, BookDeliverySerializer,
+                                 BookLoanSerializer, BookReturnSerializer,
+                                 BookSerializer)
 from library.services import BookFilter
 from users.permissions import IsLibrarianPermission
 
 
 class BookViewSet(viewsets.ModelViewSet):
-    """Контроллер для CRUD операций для модели Book."""
+    """Представление для CRUD операций для модели Book."""
 
     serializer_class = BookSerializer
     queryset = Book.objects.all()
@@ -33,7 +30,7 @@ class BookViewSet(viewsets.ModelViewSet):
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
-    """Контроллер для CRUD операций для модели Author."""
+    """Представление для CRUD операций для модели Author."""
 
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
@@ -48,7 +45,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
 
 
 class BookDeliveryAPIView(APIView):
-    """Контроллер для выдачи книги указанному пользователю по POST запросу."""
+    """Представление для выдачи книги указанному пользователю по POST запросу."""
 
     permission_classes = [IsLibrarianPermission]
 
@@ -89,12 +86,12 @@ class BookDeliveryAPIView(APIView):
 
 
 class BookReturnAPIView(APIView):
-    """Контроллер для возврата книги пользователем по POST запросу."""
+    """Представление для возврата книги по POST запросу."""
 
     permission_classes = [IsLibrarianPermission]
 
     def post(self, request, *args, **kwargs):
-        serializer_class = BookDeliverySerializer(data=request.data)
+        serializer_class = BookReturnSerializer(data=request.data)
         if not serializer_class.is_valid():
             return Response(
                 data=serializer_class.errors, status=status.HTTP_400_BAD_REQUEST
@@ -128,7 +125,7 @@ class BookReturnAPIView(APIView):
 
 
 class BookLoanListAPIView(ListAPIView):
-    """Контроллер для просмотра информации выдачах книг."""
+    """Представление для просмотра информации о выдачах книг."""
 
     serializer_class = BookLoanSerializer
 
